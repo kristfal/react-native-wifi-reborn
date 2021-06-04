@@ -124,21 +124,21 @@ RCT_EXPORT_METHOD(connectToProtectedSSID:(NSString*)ssid
         }
         configuration.joinOnce = false;
         
-        [[NEHotspotConfigurationManager sharedManager] applyConfiguration:configuration completionHandler:^(NSError * _Nullable error) {
+         [[NEHotspotConfigurationManager sharedManager] applyConfiguration:configuration completionHandler:^(NSError * _Nullable error) {
             if (error != nil) {
-                reject(@"nehotspot_error", [error localizedDescription], error);
+                reject([self parseError:error], @"Error while configuring WiFi", error);
             } else {
                 dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
-                    // Verify SSID connection
-                    if ([ssid isEqualToString:[self getWifiSSID]]){
-                        resolve(nil);
-                    } else {
-                        reject(@"nehotspot_error", [NSString stringWithFormat:@"%@/%@", @"Unable to connect to ", ssid], nil);
-                    }
-                });
+                  // Verify SSID connection
+                  if ([ssid isEqualToString:[self getWifiSSID]]){
+                      resolve(nil);
+                  } else {
+                      reject([ConnectError code:UnableToConnect], [NSString stringWithFormat:@"%@/%@", @"Unable to connect to Wi-Fi with prefix ", ssid], nil);
+                  }
+               });
             }
         }];
-
+        
     } else {
         reject(@"ios_error", @"Not supported in iOS<11.0", nil);
     }
