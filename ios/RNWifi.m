@@ -123,22 +123,24 @@ RCT_EXPORT_METHOD(connectToProtectedSSID:(NSString*)ssid
             configuration = [[NEHotspotConfiguration alloc] initWithSSID:ssid passphrase:passphrase isWEP:isWEP];
         }
         configuration.joinOnce = false;
-
+        
         [[NEHotspotConfigurationManager sharedManager] applyConfiguration:configuration completionHandler:^(NSError * _Nullable error) {
             if (error != nil) {
-                reject([self parseError:error], [error localizedDescription], error);
+                reject(@"nehotspot_error", [error localizedDescription], error);
             } else {
-                // Verify SSID connection
-                if ([ssid isEqualToString:[self getWifiSSID]]){
-                    resolve(nil);
-                } else {
-                    reject([ConnectError code:UnableToConnect], [NSString stringWithFormat:@"%@/%@", @"Unable to connect to ", ssid], nil);
-                }
+                dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 5 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+                    // Verify SSID connection
+                    if ([ssid isEqualToString:[self getWifiSSID]]){
+                        resolve(nil);
+                    } else {
+                        reject(@"nehotspot_error", [NSString stringWithFormat:@"%@/%@", @"Unable to connect to ", ssid], nil);
+                    }
+                });
             }
         }];
 
     } else {
-        reject([ConnectError code:UnavailableForOSVersion], @"Not supported in iOS<11.0", nil);
+        reject(@"ios_error", @"Not supported in iOS<11.0", nil);
     }
 }
 
