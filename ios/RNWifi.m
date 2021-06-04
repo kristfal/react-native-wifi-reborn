@@ -133,7 +133,7 @@ RCT_EXPORT_METHOD(connectToProtectedSSID:(NSString*)ssid
                   if ([ssid isEqualToString:[self getWifiSSID]]){
                       resolve(nil);
                   } else {
-                      reject([ConnectError code:UnableToConnect], [NSString stringWithFormat:@"%@/%@", @"Unable to connect to Wi-Fi with prefix ", ssid], nil);
+                      reject([ConnectError code:UnableToConnect], [NSString stringWithFormat:@"%@/%@", @"Unable to connect to Wi-Fi with SSID ", ssid], nil);
                   }
                });
             }
